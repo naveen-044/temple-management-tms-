@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Prasad Booking - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-3 justify-content-center">
+        <div class="col-lg-7">
+            <div class="temple-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Prasad Booking</h4>
+                        <small class="text-muted">Pre-order Laddus for quick counter pickup</small>
+                    </div>
+                    <span class="badge bg-warning text-dark">Prasadam</span>
+                </div>
+
+                <form id="prasadBookingForm" onsubmit="handlePrasadSubmit(event)">
+                    <div class="mb-3">
+                        <label class="form-label">Select Temple</label>
+                        <select class="form-select form-select-sm" id="templeName" required>
+                            <option value="Tirumala Tirupathi Devasthanam" selected>Tirumala Tirupathi Devasthanam</option>
+                            <option value="Sri Durga Malleswara Kanaka Durgamma">Kanaka Durgamma Temple</option>
+                            <option value="Sri Lakshmi Tirupathi Amma Temple">Sri Lakshmi Tirupathi Amma Temple</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Prasad Type</label>
+                            <select class="form-select form-select-sm" id="ladduType" required onchange="calculatePrasadTotal()">
+                                <option value="Special Cow Ghee Laddu (175g)" data-price="50" selected>Ghee Laddu (₹50 each)</option>
+                                <option value="Kalyanotsavam Big Laddu (750g)" data-price="200">Big Laddu (₹200 each)</option>
+                                <option value="Special Vada Prasadam" data-price="100">Vada Prasadam (₹100 each)</option>
+                                <option value="Tirumala Pulihora Box" data-price="50">Pulihora Box (₹50 each)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control form-control-sm" id="ladduQuantity" min="1" max="50" value="4" required oninput="calculatePrasadTotal()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Pickup Date</label>
+                            <input type="date" class="form-control form-control-sm" id="pickupDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Counter</label>
+                            <select class="form-select form-select-sm" id="counterLocation">
+                                <option value="Prasadam Complex Counter 1">Counter 1</option>
+                                <option value="Prasadam Complex Counter 3 (Express)">Counter 3 (Express)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <h6 class="fw-bold mb-2">Devotee Details</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeName" value="{{ session.get('user_name', '') }}" placeholder="Devotee Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="tel" class="form-control form-control-sm" id="devoteePhone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeAadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control form-control-sm" id="devoteeEmail" value="{{ session.get('user_email', '') }}" placeholder="devotee@example.com" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Proceed to Payment (<span id="btnPrasadPay">₹200</span>)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="temple-card p-3">
+                <h6 class="fw-bold mb-3">Summary</h6>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Price:</span>
+                    <strong class="text-dark" id="summaryPrasadUnit">₹50.00</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Quantity:</span>
+                    <strong class="text-dark" id="summaryPrasadQty">4</strong>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total:</span>
+                    <strong class="fs-5 text-primary" id="summaryPrasadTotal">₹200.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateField = document.getElementById("pickupDate");
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateField.value = tomorrow.toISOString().split("T")[0];
+        dateField.min = new Date().toISOString().split("T")[0];
+        calculatePrasadTotal();
+    });
+
+    function getPrasadPrice() {
+        var sel = document.getElementById("ladduType");
+        var opt = sel.options[sel.selectedIndex];
+        return parseFloat(opt.getAttribute("data-price")) || 50.0;
+    }
+
+    function calculatePrasadTotal() {
+        var price = getPrasadPrice();
+        var qty = parseInt(document.getElementById("ladduQuantity").value) || 1;
+        var total = price * qty;
+        document.getElementById("summaryPrasadUnit").innerText = "₹" + price.toFixed(2);
+        document.getElementById("summaryPrasadQty").innerText = qty;
+        document.getElementById("summaryPrasadTotal").innerText = "₹" + total.toFixed(2);
+        document.getElementById("btnPrasadPay").innerText = "₹" + total.toFixed(0);
+    }
+
+    function handlePrasadSubmit(e) {
+        e.preventDefault();
+        var price = getPrasadPrice();
+        var qty = parseInt(document.getElementById("ladduQuantity").value) || 1;
+        var total = price * qty;
+
+        var bookingData = {
+            temple_name: document.getElementById("templeName").value,
+            service_type: "Prasad Booking",
+            name: document.getElementById("devoteeName").value,
+            age: 35,
+            adhar: document.getElementById("devoteeAadhar").value,
+            phone: document.getElementById("devoteePhone").value,
+            email: document.getElementById("devoteeEmail").value,
+            dates: document.getElementById("pickupDate").value,
+            slot_time: "Pickup: " + document.getElementById("counterLocation").value,
+            quantity: qty,
+            unit_price: price,
+            total_amount: total
+        };
+
+        sessionStorage.setItem("pendingBooking", JSON.stringify(bookingData));
+        window.location.href = "/paid_payment?amount=" + total + "&ref=" + encodeURIComponent(bookingData.temple_name);
+    }
+</script>
+{% endblock %}

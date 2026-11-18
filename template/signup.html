@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-9">
+            <div class="temple-card p-4">
+                <div class="text-center mb-3">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 42px;" class="mb-2">
+                    <h3 class="fw-bold mb-1">Devotee Registration</h3>
+                    <p class="text-muted small">Create an account for darshan bookings</p>
+                </div>
+
+                <form method="POST" action="/signup" onsubmit="return validateSignupForm()">
+                    <div class="row g-2 mb-3">
+                        <div class="col-12">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Devotee Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Mobile Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="aadhar" class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control" id="aadhar" name="aadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit ID" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" placeholder="City" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" minlength="6" placeholder="Min. 6 chars" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="text-center mt-3 pt-2 border-top">
+                    <small class="text-muted">
+                        Already have an account? <a href="/login" class="fw-bold">Sign In</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function validateSignupForm() {
+        var pwd = document.getElementById("password").value;
+        var cpwd = document.getElementById("confirm_password").value;
+        if (pwd !== cpwd) {
+            alert("Passwords do not match.");
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}

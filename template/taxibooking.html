@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Taxi Booking - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-3 justify-content-center">
+        <div class="col-lg-7">
+            <div class="temple-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Taxi Booking</h4>
+                        <small class="text-muted">Ghat Road & Temple Travel</small>
+                    </div>
+                    <span class="badge bg-primary">Travel</span>
+                </div>
+
+                <form id="taxiBookingForm" onsubmit="handleTaxiSubmit(event)">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Pickup Location</label>
+                            <select class="form-select form-select-sm" id="pickupLocation">
+                                <option value="Tirupati Railway Station" selected>Tirupati Railway Station</option>
+                                <option value="Tirupati Airport (Renigunta)">Tirupati Airport</option>
+                                <option value="Alipiri Toll Gate">Alipiri Toll Gate</option>
+                                <option value="Vijayawada Railway Station">Vijayawada Railway Station</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Drop Destination</label>
+                            <select class="form-select form-select-sm" id="dropLocation">
+                                <option value="Tirumala Hill Top" selected>Tirumala Hill Top</option>
+                                <option value="Kanaka Durga Temple">Kanaka Durga Temple</option>
+                                <option value="Sri Lakshmi Tirupathi Amma Temple">Sri Lakshmi Tirupathi Amma Temple</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vehicle Type</label>
+                            <select class="form-select form-select-sm" id="vehicleType" onchange="calculateTaxiFare()">
+                                <option value="Standard Sedan (4 Seater)" data-price="850" selected>Sedan (4 Seater) - ₹850</option>
+                                <option value="SUV (6 Seater)" data-price="1400">SUV (6 Seater) - ₹1,400</option>
+                                <option value="Tempo Traveller (12 Seater)" data-price="2500">Tempo (12 Seater) - ₹2,500</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Date & Time</label>
+                            <input type="datetime-local" class="form-control form-control-sm" id="travelDateTime" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <h6 class="fw-bold mb-2">Devotee Details</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeName" value="{{ session.get('user_name', '') }}" placeholder="Devotee Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control form-control-sm" id="devoteePhone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeAadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control form-control-sm" id="devoteeEmail" value="{{ session.get('user_email', '') }}" placeholder="devotee@example.com" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Proceed to Payment (<span id="btnTaxiPay">₹850</span>)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="temple-card p-3">
+                <h6 class="fw-bold mb-3">Fare Summary</h6>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Fare:</span>
+                    <strong class="text-dark" id="summaryTaxiFare">₹850.00</strong>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total:</span>
+                    <strong class="fs-5 text-primary" id="summaryTaxiTotal">₹850.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateField = document.getElementById("travelDateTime");
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(9, 0, 0, 0);
+        dateField.value = tomorrow.toISOString().slice(0, 16);
+        calculateTaxiFare();
+    });
+
+    function calculateTaxiFare() {
+        var sel = document.getElementById("vehicleType");
+        var fare = parseFloat(sel.options[sel.selectedIndex].getAttribute("data-price")) || 850.0;
+        document.getElementById("summaryTaxiFare").innerText = "₹" + fare.toFixed(2);
+        document.getElementById("summaryTaxiTotal").innerText = "₹" + fare.toFixed(2);
+        document.getElementById("btnTaxiPay").innerText = "₹" + fare.toFixed(0);
+    }
+
+    function handleTaxiSubmit(e) {
+        e.preventDefault();
+        var sel = document.getElementById("vehicleType");
+        var fare = parseFloat(sel.options[sel.selectedIndex].getAttribute("data-price")) || 850.0;
+
+        var bookingData = {
+            temple_name: document.getElementById("dropLocation").value,
+            service_type: "Taxi Booking",
+            name: document.getElementById("devoteeName").value,
+            age: 35,
+            adhar: document.getElementById("devoteeAadhar").value,
+            phone: document.getElementById("devoteePhone").value,
+            email: document.getElementById("devoteeEmail").value,
+            dates: document.getElementById("travelDateTime").value.split("T")[0],
+            slot_time: "Pickup: " + document.getElementById("travelDateTime").value.replace("T", " "),
+            quantity: 1,
+            unit_price: fare,
+            total_amount: fare
+        };
+
+        sessionStorage.setItem("pendingBooking", JSON.stringify(bookingData));
+        window.location.href = "/paid_payment?amount=" + fare + "&ref=" + encodeURIComponent(bookingData.temple_name);
+    }
+</script>
+{% endblock %}

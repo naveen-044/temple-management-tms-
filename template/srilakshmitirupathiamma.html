@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Sri Lakshmi Tirupathi Amma Temple - Bookings{% endblock %}
+
+{% block content %}
+<div class="py-3 bg-white border-bottom">
+    <div class="container">
+        <h3 class="fw-bold mb-1">Sri Lakshmi Tirupathi Amma Temple</h3>
+        <p class="text-muted small mb-0"><i class="fas fa-map-marker-alt text-primary me-1"></i> Penuganchiprolu, NTR District | Darshan Hours: 05:30 AM - 09:00 PM</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <h5 class="fw-bold mb-3">Available Services</h5>
+    <div class="row g-3">
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-primary mb-2">₹350</span>
+                    <h6 class="fw-bold mb-1">Paid Darshan</h6>
+                    <small class="text-muted d-block mb-3">Special Seva</small>
+                </div>
+                <a href="/paiddarshan?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-primary btn-sm w-100">Book Darshan</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-2">Protocol</span>
+                    <h6 class="fw-bold mb-1">VIP Darshan</h6>
+                    <small class="text-muted d-block mb-3">Sahasranama</small>
+                </div>
+                <a href="/vip_darshan?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-primary btn-sm w-100">Book VIP</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-success mb-2">Free</span>
+                    <h6 class="fw-bold mb-1">Free Darshan</h6>
+                    <small class="text-muted d-block mb-3">General Queue</small>
+                </div>
+                <a href="/free_darshan?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-outline-success btn-sm w-100">Get Token</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-info text-dark mb-2">Rooms</span>
+                    <h6 class="fw-bold mb-1">Room Booking</h6>
+                    <small class="text-muted d-block mb-3">Chaultries</small>
+                </div>
+                <a href="/roombooking?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-outline-secondary btn-sm w-100">Book Room</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-2">Prasadam</span>
+                    <h6 class="fw-bold mb-1">Prasad Booking</h6>
+                    <small class="text-muted d-block mb-3">Laddus & Pongal</small>
+                </div>
+                <a href="/prasadbooking?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-outline-secondary btn-sm w-100">Order Prasad</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-danger mb-2">Annadanam</span>
+                    <h6 class="fw-bold mb-1">Food Booking</h6>
+                    <small class="text-muted d-block mb-3">Meal Seva</small>
+                </div>
+                <a href="/foodbooking?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-outline-secondary btn-sm w-100">Book Food</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-primary mb-2">Travel</span>
+                    <h6 class="fw-bold mb-1">Taxi Booking</h6>
+                    <small class="text-muted d-block mb-3">Cab Service</small>
+                </div>
+                <a href="/taxibooking?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-outline-secondary btn-sm w-100">Book Taxi</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-success mb-2">Parking</span>
+                    <h6 class="fw-bold mb-1">Vehicle Parking</h6>
+                    <small class="text-muted d-block mb-3">Puja & Parking</small>
+                </div>
+                <a href="/vehicle?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-outline-secondary btn-sm w-100">Book Parking</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

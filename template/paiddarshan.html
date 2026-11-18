@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Paid Darshan Booking - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-3 justify-content-center">
+        <!-- Main Form -->
+        <div class="col-lg-7">
+            <div class="temple-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Special Entry Darshan (₹350)</h4>
+                        <small class="text-muted">₹350 per ticket • Fast-track queue pass</small>
+                    </div>
+                    <span class="badge bg-primary">Special Entry</span>
+                </div>
+
+                <form id="darshanBookingForm" onsubmit="handleDarshanSubmit(event)">
+                    <div class="mb-3">
+                        <label class="form-label">Select Temple</label>
+                        <select class="form-select form-select-sm" id="templeName" required>
+                            <option value="Tirumala Tirupathi Devasthanam" {% if 'Tirupathi' in request.args.get('temple', '') or not request.args.get('temple') %}selected{% endif %}>Tirumala Tirupathi Devasthanam</option>
+                            <option value="Sri Durga Malleswara Kanaka Durgamma" {% if 'Kanaka' in request.args.get('temple', '') %}selected{% endif %}>Kanaka Durgamma Temple</option>
+                            <option value="Sri Lakshmi Tirupathi Amma Temple" {% if 'Lakshmi' in request.args.get('temple', '') %}selected{% endif %}>Sri Lakshmi Tirupathi Amma Temple</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Darshan Date</label>
+                            <input type="date" class="form-control form-control-sm" id="serviceDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Tickets</label>
+                            <input type="number" class="form-control form-control-sm" id="ticketQuantity" min="1" max="10" value="{{ request.args.get('qty', 1) }}" required oninput="calculateTotal()">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Select Reporting Time Slot</label>
+                        <div class="slot-grid">
+                            <div class="slot-pill active" onclick="selectSlot(this, '06:00 AM - 08:00 AM')">
+                                <div class="time-text">06:00 AM - 08:00 AM</div>
+                                <span class="avail-badge">Available</span>
+                            </div>
+                            <div class="slot-pill" onclick="selectSlot(this, '09:00 AM - 11:00 AM')">
+                                <div class="time-text">09:00 AM - 11:00 AM</div>
+                                <span class="avail-badge">Available</span>
+                            </div>
+                            <div class="slot-pill" onclick="selectSlot(this, '01:00 PM - 03:00 PM')">
+                                <div class="time-text">01:00 PM - 03:00 PM</div>
+                                <span class="avail-badge">Available</span>
+                            </div>
+                            <div class="slot-pill" onclick="selectSlot(this, '04:00 PM - 06:00 PM')">
+                                <div class="time-text">04:00 PM - 06:00 PM</div>
+                                <span class="avail-badge">Available</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedSlot" value="06:00 AM - 08:00 AM">
+                    </div>
+
+                    <hr class="my-3">
+
+                    <h6 class="fw-bold mb-2">Devotee Details</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeName" value="{{ session.get('user_name', '') }}" placeholder="Devotee Name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Age</label>
+                            <input type="number" class="form-control form-control-sm" id="devoteeAge" min="1" max="110" value="35" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeAadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control form-control-sm" id="devoteePhone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control form-control-sm" id="devoteeEmail" value="{{ session.get('user_email', '') }}" placeholder="devotee@example.com" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Proceed to Payment (<span id="btnPayAmount">₹350</span>)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="col-lg-4">
+            <div class="temple-card p-3">
+                <h6 class="fw-bold mb-3">Fare Summary</h6>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Ticket (₹350 x <span id="summaryQty">1</span>):</span>
+                    <strong class="text-dark" id="summaryBasePrice">₹350.00</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Complimentary Laddus:</span>
+                    <strong class="text-success" id="summaryLaddus">2 Laddus</strong>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total Payable:</span>
+                    <strong class="fs-5 text-primary" id="summaryTotal">₹350.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var unitPrice = 350.0;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateField = document.getElementById("serviceDate");
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        var qDate = "{{ request.args.get('date', '') }}";
+        dateField.value = qDate ? qDate : tomorrow.toISOString().split("T")[0];
+        dateField.min = new Date().toISOString().split("T")[0];
+        calculateTotal();
+    });
+
+    function selectSlot(element, slotTime) {
+        document.querySelectorAll(".slot-pill").forEach(p => p.classList.remove("active"));
+        element.classList.add("active");
+        document.getElementById("selectedSlot").value = slotTime;
+    }
+
+    function calculateTotal() {
+        var qty = parseInt(document.getElementById("ticketQuantity").value) || 1;
+        var total = unitPrice * qty;
+        document.getElementById("summaryQty").innerText = qty;
+        document.getElementById("summaryBasePrice").innerText = "₹" + (unitPrice * qty).toFixed(2);
+        document.getElementById("summaryLaddus").innerText = (qty * 2) + " Laddus";
+        document.getElementById("summaryTotal").innerText = "₹" + total.toFixed(2);
+        document.getElementById("btnPayAmount").innerText = "₹" + total.toFixed(0);
+    }
+
+    function handleDarshanSubmit(e) {
+        e.preventDefault();
+        var qty = parseInt(document.getElementById("ticketQuantity").value) || 1;
+        var total = unitPrice * qty;
+
+        var bookingData = {
+            temple_name: document.getElementById("templeName").value,
+            service_type: "Special Entry Darshan (₹350)",
+            name: document.getElementById("devoteeName").value,
+            age: document.getElementById("devoteeAge").value,
+            adhar: document.getElementById("devoteeAadhar").value,
+            phone: document.getElementById("devoteePhone").value,
+            email: document.getElementById("devoteeEmail").value,
+            dates: document.getElementById("serviceDate").value,
+            slot_time: document.getElementById("selectedSlot").value,
+            quantity: qty,
+            unit_price: unitPrice,
+            total_amount: total
+        };
+
+        sessionStorage.setItem("pendingBooking", JSON.stringify(bookingData));
+        window.location.href = "/paid_payment?amount=" + total + "&ref=" + encodeURIComponent(bookingData.temple_name);
+    }
+</script>
+{% endblock %}

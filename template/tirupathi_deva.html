@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Tirumala Tirupathi Devasthanam - Bookings{% endblock %}
+
+{% block content %}
+<div class="py-3 bg-white border-bottom">
+    <div class="container">
+        <h3 class="fw-bold mb-1">Tirumala Tirupathi Devasthanam</h3>
+        <p class="text-muted small mb-0"><i class="fas fa-map-marker-alt text-primary me-1"></i> Chittoor District, Andhra Pradesh | Darshan Hours: 03:00 AM - 11:30 PM</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <h5 class="fw-bold mb-3">Available Services</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-primary mb-2">₹350</span>
+                    <h6 class="fw-bold mb-1">Special Entry Darshan</h6>
+                    <small class="text-muted d-block mb-3">Includes 2 Laddus</small>
+                </div>
+                <a href="/paiddarshan?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-primary btn-sm w-100">Book Darshan</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-2">Protocol</span>
+                    <h6 class="fw-bold mb-1">VIP Break Darshan</h6>
+                    <small class="text-muted d-block mb-3">Morning Protocol</small>
+                </div>
+                <a href="/vip_darshan?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-primary btn-sm w-100">Book VIP</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-success mb-2">Free</span>
+                    <h6 class="fw-bold mb-1">Free Darshan</h6>
+                    <small class="text-muted d-block mb-3">Time-slotted Token</small>
+                </div>
+                <a href="/free_darshan?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-outline-success btn-sm w-100">Get Token</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-info text-dark mb-2">Rooms</span>
+                    <h6 class="fw-bold mb-1">Hill Accommodation</h6>
+                    <small class="text-muted d-block mb-3">Cottages & Suites</small>
+                </div>
+                <a href="/roombooking?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-outline-secondary btn-sm w-100">Book Room</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-2">Prasadam</span>
+                    <h6 class="fw-bold mb-1">Laddu Prasadam</h6>
+                    <small class="text-muted d-block mb-3">Extra Laddus</small>
+                </div>
+                <a href="/prasadbooking?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-outline-secondary btn-sm w-100">Order Laddu</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-danger mb-2">Annadanam</span>
+                    <h6 class="fw-bold mb-1">Food Booking</h6>
+                    <small class="text-muted d-block mb-3">Meal Seva</small>
+                </div>
+                <a href="/foodbooking?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-outline-secondary btn-sm w-100">Book Food</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-primary mb-2">Travel</span>
+                    <h6 class="fw-bold mb-1">Ghat Road Taxi</h6>
+                    <small class="text-muted d-block mb-3">Cabs to Hill</small>
+                </div>
+                <a href="/taxibooking?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-outline-secondary btn-sm w-100">Book Taxi</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <div class="temple-card text-center p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <span class="badge bg-success mb-2">Parking</span>
+                    <h6 class="fw-bold mb-1">Vehicle Parking</h6>
+                    <small class="text-muted d-block mb-3">Parking & Puja</small>
+                </div>
+                <a href="/vehicle?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-outline-secondary btn-sm w-100">Book Parking</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-3 justify-content-center">
+        <!-- Payment Options -->
+        <div class="col-lg-7">
+            <div class="temple-card p-4">
+                <h4 class="fw-bold mb-1">Payment Method</h4>
+                <p class="text-muted small mb-3">Choose how you want to pay</p>
+
+                <!-- Clean Tabs -->
+                <ul class="nav nav-pills mb-3 nav-justified" id="paymentTabs">
+                    <li class="nav-item">
+                        <button class="nav-link active py-2" data-bs-toggle="pill" data-bs-target="#tab-upi" type="button">
+                            <i class="fas fa-qrcode me-1"></i> UPI
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-2" data-bs-toggle="pill" data-bs-target="#tab-cards" type="button">
+                            <i class="fas fa-credit-card me-1"></i> Card
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-2" data-bs-toggle="pill" data-bs-target="#tab-nb" type="button">
+                            <i class="fas fa-university me-1"></i> Net Banking
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- UPI Tab -->
+                    <div class="tab-pane fade show active" id="tab-upi">
+                        <div class="text-center p-3 rounded bg-light border mb-3">
+                            <div class="p-2 bg-white d-inline-block rounded border mb-2">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=temple@sbi&pn=Temple%20Management&am={{ request.args.get('amount', 350) }}&cu=INR" alt="QR" style="width: 130px; height: 130px;">
+                            </div>
+                            <div class="d-flex justify-content-center gap-2 mb-2">
+                                <img src="{{ url_for('static', filename='phonepe_logo.png') }}" alt="PhonePe" style="height: 20px;">
+                                <img src="{{ url_for('static', filename='googlepay_logo.png') }}" alt="Google Pay" style="height: 20px;">
+                                <span class="badge bg-secondary">Paytm</span>
+                            </div>
+                            <small class="text-muted d-block">Scan QR code using PhonePe, Google Pay, or Paytm</small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="agreeUpi" checked required>
+                            <label class="form-check-label small text-muted" for="agreeUpi">
+                                I agree to the <a href="/tc">terms and conditions</a>
+                            </label>
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100 py-2" onclick="executePayment('UPI')">
+                            Pay Now (<span class="displayPayAmount">₹{{ request.args.get('amount', 350) }}</span>)
+                        </button>
+                    </div>
+
+                    <!-- Cards Tab -->
+                    <div class="tab-pane fade" id="tab-cards">
+                        <form onsubmit="event.preventDefault(); executePayment('Card');">
+                            <div class="mb-2">
+                                <label class="form-label">Card Number</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="16-digit card number" maxlength="19" required>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label">Expiry (MM/YY)</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="MM/YY" maxlength="5" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">CVV</label>
+                                    <input type="password" class="form-control form-control-sm" placeholder="CVV" maxlength="3" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Name on Card</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="Cardholder Name" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                Pay with Card (<span class="displayPayAmount">₹{{ request.args.get('amount', 350) }}</span>)
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Net Banking Tab -->
+                    <div class="tab-pane fade" id="tab-nb">
+                        <div class="mb-3">
+                            <label class="form-label">Select Bank</label>
+                            <select class="form-select form-select-sm">
+                                <option>State Bank of India (SBI)</option>
+                                <option>HDFC Bank</option>
+                                <option>ICICI Bank</option>
+                                <option>Axis Bank</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100 py-2" onclick="executePayment('NetBanking')">
+                            Continue with Net Banking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="col-lg-4">
+            <div class="temple-card p-3">
+                <h6 class="fw-bold mb-3">Order Summary</h6>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Temple</small>
+                    <strong class="text-dark small" id="displayTemple">Tirumala Tirupathi Devasthanam</strong>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Service</small>
+                    <span class="text-dark small" id="displayService">Special Entry Darshan (₹350)</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Devotee</small>
+                    <span class="text-dark small" id="displayDevoteeName">-</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Date</small>
+                    <span class="text-dark small" id="displayDate">-</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total:</span>
+                    <strong class="fs-5 text-primary" id="displayTotal">₹{{ request.args.get('amount', 350) }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var raw = sessionStorage.getItem("pendingBooking");
+        if (raw) {
+            try {
+                var b = JSON.parse(raw);
+                if (b.temple_name) document.getElementById("displayTemple").innerText = b.temple_name;
+                if (b.service_type) document.getElementById("displayService").innerText = b.service_type;
+                if (b.name) document.getElementById("displayDevoteeName").innerText = b.name;
+                if (b.dates) document.getElementById("displayDate").innerText = b.dates;
+                if (b.total_amount) {
+                    var tot = "₹" + parseFloat(b.total_amount).toFixed(2);
+                    document.getElementById("displayTotal").innerText = tot;
+                    document.querySelectorAll(".displayPayAmount").forEach(el => el.innerText = "₹" + parseFloat(b.total_amount).toFixed(0));
+                }
+            } catch(e) {}
+        }
+    });
+
+    function executePayment(method) {
+        var raw = sessionStorage.getItem("pendingBooking");
+        var bookingData = {};
+        if (raw) {
+            try { bookingData = JSON.parse(raw); } catch(e) {}
+        }
+
+        if (!bookingData.name) {
+            bookingData.name = "{{ session.get('user_name', 'Devotee') }}";
+            bookingData.email = "{{ session.get('user_email', 'santhoshpodili874@gmail.com') }}";
+            bookingData.phone = "8374710287";
+            bookingData.adhar = "999988887777";
+            bookingData.temple_name = "{{ request.args.get('ref', 'Tirumala Tirupathi Devasthanam') }}";
+            bookingData.service_type = "Special Entry Darshan (₹350)";
+            bookingData.dates = new Date().toISOString().split("T")[0];
+            bookingData.slot_time = "09:00 AM - 11:00 AM";
+            bookingData.quantity = 1;
+            bookingData.total_amount = parseFloat("{{ request.args.get('amount', 350) }}") || 350.0;
+        }
+
+        bookingData.payment_status = "Completed";
+        bookingData.payment_method = method;
+
+        fetch('/save_booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            sessionStorage.removeItem("pendingBooking");
+            window.location.href = "/confirmation?ref=" + (data.booking_ref || "");
+        })
+        .catch(err => {
+            window.location.href = "/confirmation";
+        });
+    }
+</script>
+{% endblock %}

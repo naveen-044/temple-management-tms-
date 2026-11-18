@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Temple Management System{% endblock %}</title>
+    
+    <!-- Clean Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Clean Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Minimal Clean Header Bar -->
+    <div class="py-1 px-3 d-none d-md-block" style="background: #090D16; color: #94A3B8; font-size: 0.775rem; border-bottom: 1px solid #1E293B;">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <span class="me-3"><i class="fas fa-clock text-warning me-1"></i> Timings: 05:30 AM - 09:30 PM</span>
+                <span><i class="fas fa-phone-alt text-warning me-1"></i> Helpline: 8374710287</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/tc" class="text-secondary text-decoration-none"><i class="fas fa-shield-alt me-1"></i> Guidelines</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg temple-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <span>Temple Management</span>
+            </a>
+            
+            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMainContent" aria-controls="navbarMainContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars text-white fs-5"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarMainContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
+                    </li>
+                    
+                    <!-- Temples Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Temples
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/tirupathi_deva">Tirumala Tirupathi Devasthanam</a></li>
+                            <li><a class="dropdown-item" href="/kanaka_durgamma">Kanaka Durgamma Temple</a></li>
+                            <li><a class="dropdown-item" href="/srilakshmitirupathiamma">Sri Lakshmi Tirupathi Amma</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Services Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Bookings
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/paiddarshan"><i class="fas fa-ticket-alt text-warning me-2"></i> Special Entry Darshan (₹350)</a></li>
+                            <li><a class="dropdown-item" href="/vip_darshan"><i class="fas fa-crown text-warning me-2"></i> VIP Break Darshan</a></li>
+                            <li><a class="dropdown-item" href="/free_darshan"><i class="fas fa-user-check text-success me-2"></i> Free Dharma Darshan</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/roombooking"><i class="fas fa-hotel text-info me-2"></i> Room Booking</a></li>
+                            <li><a class="dropdown-item" href="/prasadbooking"><i class="fas fa-cookie-bite text-warning me-2"></i> Prasad Booking</a></li>
+                            <li><a class="dropdown-item" href="/foodbooking"><i class="fas fa-bowl-rice text-danger me-2"></i> Food Booking</a></li>
+                            <li><a class="dropdown-item" href="/taxibooking"><i class="fas fa-taxi text-primary me-2"></i> Taxi Booking</a></li>
+                            <li><a class="dropdown-item" href="/vehicle"><i class="fas fa-car text-success me-2"></i> Vehicle Parking</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/#contact">Contact</a>
+                    </li>
+                </ul>
+                
+                <!-- Compact Search Box -->
+                <div class="search-container me-lg-3 my-2 my-lg-0">
+                    <input type="text" id="globalSearchInput" placeholder="Search temple or service..." onkeyup="handleGlobalSearch(this.value)" autocomplete="off">
+                    <div id="suggestions-list"></div>
+                </div>
+                
+                <!-- Auth Section -->
+                <div class="d-flex align-items-center gap-2">
+                    {% if session.get('user_id') %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle"></i>
+                                <span>{{ session.get('user_name', 'Devotee') }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/my-bookings"><i class="fas fa-ticket-alt me-2 text-primary"></i> My Bookings</a></li>
+                                {% if session.get('user_role') == 'admin' %}
+                                    <li><a class="dropdown-item" href="/admin"><i class="fas fa-tachometer-alt me-2 text-danger"></i> Admin Dashboard</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Sign Out</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="/login" class="btn btn-outline-light btn-sm">Sign In</a>
+                        <a href="/signup" class="btn btn-warning btn-sm fw-bold">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Alerts -->
+    <div class="container mt-2">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else (category if category in ['success','info','warning'] else 'primary') }} alert-dismissible fade show py-2 px-3 small border-0 shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Clean Minimal Footer -->
+    <footer class="temple-footer">
+        <div class="container">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 28px;">
+                        <span class="text-white fw-bold">Temple Management System</span>
+                    </div>
+                    <p class="small text-secondary mb-0">Official platform for online darshan booking, accommodation, and pilgrim services.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="text-white">Quick Links</h5>
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-1"><a href="/paiddarshan">Paid Darshan</a></li>
+                        <li class="mb-1"><a href="/roombooking">Room Booking</a></li>
+                        <li class="mb-1"><a href="/prasadbooking">Prasad Booking</a></li>
+                        <li><a href="/tc">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="text-white">Contact</h5>
+                    <p class="small text-secondary mb-1"><i class="fas fa-phone-alt me-2"></i> Contact: 8374710287</p>
+                    <p class="small text-secondary mb-0"><i class="fas fa-envelope me-2"></i> Email: santhoshpodili874@gmail.com</p>
+                </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between align-items-center small text-secondary">
+                <span>&copy; 2026 Temple Management System. All rights reserved.</span>
+                <div>
+                    <a href="/tc" class="me-3">Terms</a>
+                    <a href="/tc">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Global Search Script -->
+    <script>
+        var searchIndex = [
+            { title: "Tirumala Tirupathi Devasthanam", url: "/tirupathi_deva", type: "Temple" },
+            { title: "Kanaka Durgamma Temple", url: "/kanaka_durgamma", type: "Temple" },
+            { title: "Sri Lakshmi Tirupathi Amma Temple", url: "/srilakshmitirupathiamma", type: "Temple" },
+            { title: "Paid Darshan (₹350)", url: "/paiddarshan", type: "Darshan" },
+            { title: "VIP Break Darshan", url: "/vip_darshan", type: "Darshan" },
+            { title: "Free Darshan", url: "/free_darshan", type: "Darshan" },
+            { title: "Room Booking", url: "/roombooking", type: "Rooms" },
+            { title: "Prasad Booking", url: "/prasadbooking", type: "Prasad" },
+            { title: "Food Booking", url: "/foodbooking", type: "Food" },
+            { title: "Taxi Booking", url: "/taxibooking", type: "Taxi" },
+            { title: "Vehicle Parking", url: "/vehicle", type: "Vehicle" }
+        ];
+
+        function handleGlobalSearch(term) {
+            var container = document.getElementById("suggestions-list");
+            if (!container) return;
+            var clean = term.trim().toLowerCase();
+            container.innerHTML = "";
+            if (clean.length === 0) {
+                container.style.display = "none";
+                return;
+            }
+            var matches = searchIndex.filter(function(i) {
+                return i.title.toLowerCase().includes(clean);
+            });
+            if (matches.length > 0) {
+                matches.forEach(function(i) {
+                    var div = document.createElement("div");
+                    div.className = "suggestion-item";
+                    div.innerHTML = `<span class="fw-bold">${i.title}</span> <small class="text-muted ms-auto">${i.type}</small>`;
+                    div.onclick = function() { window.location.href = i.url; };
+                    container.appendChild(div);
+                });
+                container.style.display = "block";
+            } else {
+                container.style.display = "none";
+            }
+        }
+
+        document.addEventListener("click", function(e) {
+            var box = document.querySelector(".search-container");
+            var sug = document.getElementById("suggestions-list");
+            if (sug && box && !box.contains(e.target)) {
+                sug.style.display = "none";
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

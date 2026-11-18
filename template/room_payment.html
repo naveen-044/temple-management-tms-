@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Room Payment - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-3 justify-content-center">
+        <div class="col-lg-7">
+            <div class="temple-card p-4">
+                <h4 class="fw-bold mb-1">Room Payment</h4>
+                <p class="text-muted small mb-3">Complete payment to confirm room allocation</p>
+
+                <div class="text-center p-3 rounded bg-light border mb-3">
+                    <div class="p-2 bg-white d-inline-block rounded border mb-2">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=temple@sbi&pn=Temple%20Management&am={{ request.args.get('amount', 1200) }}&cu=INR" alt="QR" style="width: 130px; height: 130px;">
+                    </div>
+                    <div class="d-flex justify-content-center gap-2 mb-2">
+                        <img src="{{ url_for('static', filename='phonepe_logo.png') }}" alt="PhonePe" style="height: 20px;">
+                        <img src="{{ url_for('static', filename='googlepay_logo.png') }}" alt="Google Pay" style="height: 20px;">
+                    </div>
+                    <small class="text-muted d-block">Scan QR to pay with PhonePe, Google Pay, or Paytm</small>
+                </div>
+
+                <button type="button" class="btn btn-primary w-100 py-2 mb-2" onclick="executeRoomPayment('UPI')">
+                    Confirm UPI Payment (<span id="roomDisplayAmount">₹{{ request.args.get('amount', 1200) }}</span>)
+                </button>
+                <button type="button" class="btn btn-outline-secondary w-100 py-2" onclick="executeRoomPayment('Card / Bank')">
+                    Pay with Card / Net Banking
+                </button>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="temple-card p-3">
+                <h6 class="fw-bold mb-3">Room Summary</h6>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Guest House</small>
+                    <strong class="text-dark small" id="dispRoomHotel">Srinikethanam Deluxe AC</strong>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Devotee</small>
+                    <span class="text-dark small" id="dispRoomDevotee">-</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Check-in Date</small>
+                    <span class="text-dark small" id="dispRoomDate">-</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total:</span>
+                    <strong class="fs-5 text-primary" id="dispRoomTotal">₹{{ request.args.get('amount', 1200) }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var raw = sessionStorage.getItem("pendingBooking");
+        if (raw) {
+            try {
+                var b = JSON.parse(raw);
+                if (b.extra_details && b.extra_details.hotel) document.getElementById("dispRoomHotel").innerText = b.extra_details.hotel;
+                if (b.name) document.getElementById("dispRoomDevotee").innerText = b.name;
+                if (b.dates) document.getElementById("dispRoomDate").innerText = b.dates;
+                if (b.total_amount) {
+                    var tot = "₹" + parseFloat(b.total_amount).toFixed(2);
+                    document.getElementById("dispRoomTotal").innerText = tot;
+                    document.getElementById("roomDisplayAmount").innerText = "₹" + parseFloat(b.total_amount).toFixed(0);
+                }
+            } catch(e) {}
+        }
+    });
+
+    function executeRoomPayment(method) {
+        var raw = sessionStorage.getItem("pendingBooking");
+        var bookingData = {};
+        if (raw) {
+            try { bookingData = JSON.parse(raw); } catch(e) {}
+        }
+        if (!bookingData.name) {
+            bookingData.name = "{{ session.get('user_name', 'Devotee') }}";
+            bookingData.email = "{{ session.get('user_email', 'santhoshpodili874@gmail.com') }}";
+            bookingData.phone = "8374710287";
+            bookingData.adhar = "999988887777";
+            bookingData.temple_name = "{{ request.args.get('ref', 'Tirumala Tirupathi Devasthanam') }}";
+            bookingData.service_type = "Room Booking";
+            bookingData.dates = new Date().toISOString().split("T")[0];
+            bookingData.slot_time = "Check-in: 12:00 PM";
+            bookingData.quantity = 1;
+            bookingData.total_amount = parseFloat("{{ request.args.get('amount', 1200) }}") || 1200.0;
+        }
+
+        bookingData.payment_status = "Completed";
+        bookingData.payment_method = method;
+
+        fetch('/save_booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookingData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            sessionStorage.removeItem("pendingBooking");
+            window.location.href = "/confirmation?ref=" + (data.booking_ref || "");
+        })
+        .catch(err => {
+            window.location.href = "/confirmation";
+        });
+    }
+</script>
+{% endblock %}

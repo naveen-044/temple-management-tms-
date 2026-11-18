@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmed - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-10">
+            <div class="temple-card text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success fs-1"></i>
+                </div>
+
+                <h3 class="fw-bold mb-1">Booking Confirmed!</h3>
+                <p class="text-muted small mb-3">Your booking has been successfully recorded</p>
+
+                <div class="p-3 rounded bg-light border text-start mb-3 small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Booking Reference:</span>
+                        <strong class="text-dark font-monospace">{{ booking.booking_ref if booking else (request.args.get('ref', 'TTD-78214')) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Temple:</span>
+                        <strong class="text-dark">{{ booking.temple_name if booking else 'Tirumala Tirupathi Devasthanam' }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Service:</span>
+                        <span class="text-dark">{{ booking.service_type if booking else 'Special Entry Darshan' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Date & Slot:</span>
+                        <span class="text-dark">{{ booking.service_date if booking else 'Confirmed' }} ({{ booking.slot_time if booking else '09:00 AM' }})</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Amount Paid:</span>
+                        <strong class="text-success">₹{{ booking.total_amount if booking else '350.00' }}</strong>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="/receipt/{{ booking.booking_ref if booking else (request.args.get('ref', 'TTD-78214')) }}" class="btn btn-primary btn-sm px-3">
+                        <i class="fas fa-print me-1"></i> View / Print Pass
+                    </a>
+                    <a href="/my-bookings" class="btn btn-outline-secondary btn-sm px-3">
+                        My Bookings
+                    </a>
+                    <a href="/" class="btn btn-outline-secondary btn-sm px-3">
+                        Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

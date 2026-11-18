@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Temple Management System - Home{% endblock %}
+
+{% block content %}
+<!-- Compact Clean Hero Section -->
+<section class="py-4" style="background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 mb-2 small fw-semibold">Online Darshan Portal</span>
+                <h1 class="text-dark mb-2 fw-bold">Temple Management System</h1>
+                <p class="text-muted small mb-3">Book Special Entry Darshan tickets, room accommodation, and seva passes online.</p>
+                <div class="d-flex gap-2">
+                    <a href="/paiddarshan" class="btn btn-primary btn-sm"><i class="fas fa-ticket-alt me-1"></i> Paid Darshan (₹350)</a>
+                    <a href="/free_darshan" class="btn btn-outline-secondary btn-sm"><i class="fas fa-user-check me-1"></i> Free Darshan</a>
+                    <a href="/roombooking" class="btn btn-outline-secondary btn-sm"><i class="fas fa-hotel me-1"></i> Rooms</a>
+                </div>
+            </div>
+
+            <!-- Compact Quick Booking Box -->
+            <div class="col-lg-6">
+                <div class="temple-card p-3">
+                    <h5 class="mb-2 fw-bold"><i class="fas fa-calendar-check text-primary me-2"></i>Quick Booking</h5>
+                    <form onsubmit="handleQuickBooking(event)">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Temple</label>
+                                <select class="form-select form-select-sm" id="quickTemple">
+                                    <option value="tirupathi">Tirumala Tirupathi Devasthanam</option>
+                                    <option value="kanaka">Kanaka Durgamma Temple</option>
+                                    <option value="lakshmi">Sri Lakshmi Tirupathi Amma</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Service</label>
+                                <select class="form-select form-select-sm" id="quickService">
+                                    <option value="/paiddarshan">Paid Darshan (₹350)</option>
+                                    <option value="/vip_darshan">VIP Break Darshan</option>
+                                    <option value="/free_darshan">Free Darshan</option>
+                                    <option value="/roombooking">Room Booking</option>
+                                    <option value="/prasadbooking">Prasad Booking</option>
+                                    <option value="/foodbooking">Food Booking</option>
+                                    <option value="/taxibooking">Taxi Booking</option>
+                                    <option value="/vehicle">Vehicle Parking</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control form-control-sm" id="quickDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Devotees</label>
+                                <select class="form-select form-select-sm" id="quickDevotees">
+                                    <option value="1">1 Person</option>
+                                    <option value="2" selected>2 Persons</option>
+                                    <option value="3">3 Persons</option>
+                                    <option value="4">4 Persons</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Check Availability & Book</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Temples Showcase -->
+<section class="py-4">
+    <div class="container">
+        <h4 class="mb-3 fw-bold">Select Temple</h4>
+        <div class="row g-3">
+            <!-- Temple 1 -->
+            <div class="col-md-4">
+                <div class="temple-showcase-card">
+                    <div class="img-wrapper">
+                        <img src="{{ url_for('static', filename='tirupati.jpg') }}" alt="Tirupati">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <h5 class="fw-bold mb-1">Tirumala Tirupathi Devasthanam</h5>
+                            <p class="text-muted small mb-2">Lord Sri Venkateswara Swami temple, Chittoor District.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/tirupathi_deva" class="btn btn-outline-secondary btn-sm flex-grow-1">Details</a>
+                            <a href="/paiddarshan?temple=Tirumala+Tirupathi+Devasthanam" class="btn btn-primary btn-sm flex-grow-1">Book Darshan</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temple 2 -->
+            <div class="col-md-4">
+                <div class="temple-showcase-card">
+                    <div class="img-wrapper">
+                        <img src="{{ url_for('static', filename='kanaka_durgamma.jpg') }}" alt="Kanaka Durgamma">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <h5 class="fw-bold mb-1">Kanaka Durgamma Temple</h5>
+                            <p class="text-muted small mb-2">Indrakeeladri hill temple, Vijayawada.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/kanaka_durgamma" class="btn btn-outline-secondary btn-sm flex-grow-1">Details</a>
+                            <a href="/paiddarshan?temple=Sri+Durga+Malleswara+Kanaka+Durgamma" class="btn btn-primary btn-sm flex-grow-1">Book Darshan</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temple 3 -->
+            <div class="col-md-4">
+                <div class="temple-showcase-card">
+                    <div class="img-wrapper">
+                        <img src="{{ url_for('static', filename='ammappl.jpg') }}" alt="Sri Lakshmi Tirupathi Amma">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <h5 class="fw-bold mb-1">Sri Lakshmi Tirupathi Amma</h5>
+                            <p class="text-muted small mb-2">Pilgrimage temple in Penuganchiprolu.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/srilakshmitirupathiamma" class="btn btn-outline-secondary btn-sm flex-grow-1">Details</a>
+                            <a href="/paiddarshan?temple=Sri+Lakshmi+Tirupathi+Amma+Temple" class="btn btn-primary btn-sm flex-grow-1">Book Darshan</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section class="py-4 bg-white" style="border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <h4 class="mb-3 fw-bold">Online Services</h4>
+        <div class="row g-3">
+            <div class="col-lg-3 col-6">
+                <a href="/paiddarshan" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-ticket-alt text-primary fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Paid Darshan</h6>
+                        <small class="text-muted d-block">₹350 Special Entry</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/vip_darshan" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-crown text-warning fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">VIP Darshan</h6>
+                        <small class="text-muted d-block">Morning Protocol</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/free_darshan" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-user-check text-success fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Free Darshan</h6>
+                        <small class="text-muted d-block">Time-Slotted Token</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/roombooking" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-hotel text-info fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Room Booking</h6>
+                        <small class="text-muted d-block">Cottages & Suites</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/prasadbooking" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-cookie-bite text-warning fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Prasad Booking</h6>
+                        <small class="text-muted d-block">Laddus & Vada</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/foodbooking" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-bowl-rice text-danger fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Food Booking</h6>
+                        <small class="text-muted d-block">Annadanam Seva</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/taxibooking" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-taxi text-primary fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Taxi Booking</h6>
+                        <small class="text-muted d-block">Ghat Road Travel</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-6">
+                <a href="/vehicle" class="text-decoration-none">
+                    <div class="temple-card text-center p-3">
+                        <i class="fas fa-car text-success fs-4 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Vehicle Parking</h6>
+                        <small class="text-muted d-block">Parking & Puja</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About & Contact Section -->
+<section id="about" class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6" id="about">
+                <div class="temple-card h-100 p-3">
+                    <h5 class="fw-bold mb-2">About Us</h5>
+                    <p class="text-muted small mb-0">
+                        The Temple Management System provides an online portal for devotees to reserve darshan tickets, accommodation, and temple services across prominent shrines. Our system ensures transparent slot booking and verified digital passes.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6" id="contact">
+                <div class="temple-card h-100 p-3">
+                    <h5 class="fw-bold mb-2">Contact Us</h5>
+                    <p class="text-muted small mb-1"><i class="fas fa-phone-alt me-2 text-primary"></i> Contact: 8374710287</p>
+                    <p class="text-muted small mb-0"><i class="fas fa-envelope me-2 text-primary"></i> Email: santhoshpodili874@gmail.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateInput = document.getElementById("quickDate");
+        if (dateInput) {
+            var today = new Date().toISOString().split("T")[0];
+            dateInput.value = today;
+            dateInput.min = today;
+        }
+    });
+
+    function handleQuickBooking(e) {
+        e.preventDefault();
+        var serviceUrl = document.getElementById("quickService").value;
+        var temple = document.getElementById("quickTemple").value;
+        var dateVal = document.getElementById("quickDate").value;
+        var qty = document.getElementById("quickDevotees").value;
+        window.location.href = serviceUrl + "?temple=" + encodeURIComponent(temple) + "&date=" + encodeURIComponent(dateVal) + "&qty=" + encodeURIComponent(qty);
+    }
+</script>
+{% endblock %}

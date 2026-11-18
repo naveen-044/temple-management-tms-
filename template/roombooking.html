@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Room Booking - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-3 justify-content-center">
+        <div class="col-lg-7">
+            <div class="temple-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Room Booking</h4>
+                        <small class="text-muted">Pilgrim Cottages and Guest Houses</small>
+                    </div>
+                    <span class="badge bg-info text-dark">Accommodation</span>
+                </div>
+
+                <form id="roomBookingForm" onsubmit="handleRoomSubmit(event)">
+                    <div class="mb-3">
+                        <label class="form-label">Location / Temple</label>
+                        <select class="form-select form-select-sm" id="templeName" required>
+                            <option value="Tirumala Tirupathi Devasthanam" {% if 'Tirupathi' in request.args.get('temple', '') or not request.args.get('temple') %}selected{% endif %}>Tirumala Tirupathi Devasthanam</option>
+                            <option value="Sri Durga Malleswara Kanaka Durgamma" {% if 'Kanaka' in request.args.get('temple', '') %}selected{% endif %}>Kanaka Durgamma Temple</option>
+                            <option value="Sri Lakshmi Tirupathi Amma Temple" {% if 'Lakshmi' in request.args.get('temple', '') %}selected{% endif %}>Sri Lakshmi Tirupathi Amma Temple</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Select Guest House</label>
+                            <select class="form-select form-select-sm" id="hotelName" required onchange="calculateRoomTotal()">
+                                <option value="Srinikethanam Deluxe AC Guest House" data-price="1200" selected>Srinikethanam Deluxe AC (₹1200/day)</option>
+                                <option value="Padmavathi Rest House (AC Suite)" data-price="1500">Padmavathi Rest House (₹1500/day)</option>
+                                <option value="Hotel Sunikrishna (Tirupathi)" data-price="950">Hotel Sunikrishna (₹950/day)</option>
+                                <option value="KVP Inn Hotel (Tirupathi)" data-price="850">KVP Inn Hotel (₹850/day)</option>
+                                <option value="Hotel Govind Heights (Tirupathi)" data-price="1100">Hotel Govind Heights (₹1100/day)</option>
+                                <option value="Standard Non-AC Chaultry" data-price="450">Standard Non-AC (₹450/day)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Rooms</label>
+                            <input type="number" class="form-control form-control-sm" id="roomCount" min="1" max="4" value="1" required oninput="calculateRoomTotal()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Check-in Date</label>
+                            <input type="date" class="form-control form-control-sm" id="checkinDate" required onchange="calculateRoomTotal()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Duration</label>
+                            <select class="form-select form-select-sm" id="stayDays" onchange="calculateRoomTotal()">
+                                <option value="1" selected>1 Day</option>
+                                <option value="2">2 Days</option>
+                                <option value="3">3 Days</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <h6 class="fw-bold mb-2">Devotee Details</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeName" value="{{ session.get('user_name', '') }}" placeholder="Devotee Name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Age</label>
+                            <input type="number" class="form-control form-control-sm" id="devoteeAge" min="18" max="110" value="35" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Aadhaar Number</label>
+                            <input type="text" class="form-control form-control-sm" id="devoteeAadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control form-control-sm" id="devoteePhone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control form-control-sm" id="devoteeEmail" value="{{ session.get('user_email', '') }}" placeholder="devotee@example.com" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        Proceed to Payment (<span id="btnRoomPayAmount">₹1200</span>)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="temple-card p-3">
+                <h6 class="fw-bold mb-3">Tariff Summary</h6>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Rate:</span>
+                    <strong class="text-dark" id="summaryRoomRate">₹1200.00</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Rooms:</span>
+                    <strong class="text-dark" id="summaryRoomCount">1 Room</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Duration:</span>
+                    <strong class="text-dark" id="summaryStayDays">1 Day</strong>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total:</span>
+                    <strong class="fs-5 text-primary" id="summaryRoomTotal">₹1200.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateField = document.getElementById("checkinDate");
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateField.value = tomorrow.toISOString().split("T")[0];
+        dateField.min = new Date().toISOString().split("T")[0];
+        calculateRoomTotal();
+    });
+
+    function getSelectedRoomPrice() {
+        var sel = document.getElementById("hotelName");
+        var opt = sel.options[sel.selectedIndex];
+        return parseFloat(opt.getAttribute("data-price")) || 1200.0;
+    }
+
+    function calculateRoomTotal() {
+        var rate = getSelectedRoomPrice();
+        var rooms = parseInt(document.getElementById("roomCount").value) || 1;
+        var days = parseInt(document.getElementById("stayDays").value) || 1;
+        var total = rate * rooms * days;
+        document.getElementById("summaryRoomRate").innerText = "₹" + rate.toFixed(2);
+        document.getElementById("summaryRoomCount").innerText = rooms + " Room(s)";
+        document.getElementById("summaryStayDays").innerText = days + " Day(s)";
+        document.getElementById("summaryRoomTotal").innerText = "₹" + total.toFixed(2);
+        document.getElementById("btnRoomPayAmount").innerText = "₹" + total.toFixed(0);
+    }
+
+    function handleRoomSubmit(e) {
+        e.preventDefault();
+        var rate = getSelectedRoomPrice();
+        var rooms = parseInt(document.getElementById("roomCount").value) || 1;
+        var days = parseInt(document.getElementById("stayDays").value) || 1;
+        var total = rate * rooms * days;
+
+        var bookingData = {
+            temple_name: document.getElementById("templeName").value,
+            service_type: "Room Booking",
+            name: document.getElementById("devoteeName").value,
+            age: document.getElementById("devoteeAge").value,
+            adhar: document.getElementById("devoteeAadhar").value,
+            phone: document.getElementById("devoteePhone").value,
+            email: document.getElementById("devoteeEmail").value,
+            dates: document.getElementById("checkinDate").value,
+            slot_time: "Check-in: 12:00 PM (" + days + " Day" + (days > 1 ? "s" : "") + ")",
+            quantity: rooms,
+            unit_price: rate,
+            total_amount: total,
+            extra_details: {
+                hotel: document.getElementById("hotelName").value,
+                rooms: rooms,
+                days: days
+            }
+        };
+
+        sessionStorage.setItem("pendingBooking", JSON.stringify(bookingData));
+        window.location.href = "/room_payment?amount=" + total + "&ref=" + encodeURIComponent(bookingData.temple_name);
+    }
+</script>
+{% endblock %}

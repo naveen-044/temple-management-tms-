@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Temple Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0"><i class="fas fa-tachometer-alt text-primary me-2"></i>Admin Dashboard</h4>
+            <small class="text-muted">Manage pilgrims, gate check-ins, and bookings</small>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
+            <button class="btn btn-primary btn-sm" onclick="exportTableToCSV('pilgrims.csv')"><i class="fas fa-download me-1"></i> Export CSV</button>
+        </div>
+    </div>
+
+    <!-- Clean Compact Stats -->
+    <div class="row g-2 mb-3">
+        <div class="col-md-2 col-4">
+            <div class="stat-box p-2">
+                <div class="stat-number fs-4">{{ stats.total_bookings }}</div>
+                <div class="stat-label">Bookings</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-4">
+            <div class="stat-box p-2">
+                <div class="stat-number fs-4 text-success">{{ stats.total_pilgrims }}</div>
+                <div class="stat-label">Devotees</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-4">
+            <div class="stat-box p-2">
+                <div class="stat-number fs-4 text-primary">₹{{ "{:,.0f}".format(stats.total_revenue) }}</div>
+                <div class="stat-label">Revenue</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-4">
+            <div class="stat-box p-2">
+                <div class="stat-number fs-4 text-info">{{ stats.today_bookings }}</div>
+                <div class="stat-label">Today's Visits</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-4">
+            <div class="stat-box p-2">
+                <div class="stat-number fs-4 text-success">{{ stats.checked_in }}</div>
+                <div class="stat-label">Checked-In</div>
+            </div>
+        </div>
+        <div class="col-md-2 col-4">
+            <div class="stat-box p-2">
+                <div class="stat-number fs-4">{{ stats.total_users }}</div>
+                <div class="stat-label">Users</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Check-in Scanner -->
+    <div class="temple-card p-3 mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <form onsubmit="handleAdminCheckin(event)" class="d-flex gap-2">
+                    <input type="text" class="form-control form-control-sm" id="checkinRefInput" placeholder="Enter Ref ID e.g. TTD-78214" required>
+                    <button class="btn btn-primary btn-sm px-3" type="submit">Verify</button>
+                </form>
+            </div>
+            <div class="col-md-7">
+                <div id="checkinResultBox" class="small p-2 rounded bg-light border d-none">
+                    <span id="checkinResultText"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Bookings -->
+    <div class="temple-card p-0 overflow-hidden">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0">Pilgrims Registry ({{ bookings|length }})</h6>
+            <div class="d-flex gap-2">
+                <form method="GET" action="/admin" class="d-flex gap-1">
+                    <select name="temple" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 140px;">
+                        <option value="all">All Temples</option>
+                        <option value="Tirupathi" {% if current_temple == 'Tirupathi' %}selected{% endif %}>Tirupati</option>
+                        <option value="Kanaka" {% if current_temple == 'Kanaka' %}selected{% endif %}>Kanaka Durga</option>
+                        <option value="Lakshmi" {% if current_temple == 'Lakshmi' %}selected{% endif %}>Lakshmi Amma</option>
+                    </select>
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 120px;">
+                        <option value="all">All Status</option>
+                        <option value="Confirmed" {% if current_status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="Checked-In" {% if current_status == 'Checked-In' %}selected{% endif %}>Checked-In</option>
+                        <option value="Cancelled" {% if current_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="pilgrimsTable">
+                <thead>
+                    <tr>
+                        <th>Ref</th>
+                        <th>Devotee</th>
+                        <th>Temple</th>
+                        <th>Service</th>
+                        <th>Date & Slot</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                        <tr>
+                            <td class="font-monospace fw-bold text-primary">{{ b.booking_ref }}</td>
+                            <td>
+                                <div class="fw-bold">{{ b.devotee_name }}</div>
+                                <small class="text-muted">{{ b.phone }}</small>
+                            </td>
+                            <td>{{ b.temple_name.split(' ')[0] }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ b.service_type }}</span></td>
+                            <td>
+                                <div>{{ b.service_date }}</div>
+                                <small class="text-muted">{{ b.slot_time }}</small>
+                            </td>
+                            <td>₹{{ b.total_amount }}</td>
+                            <td>
+                                <span class="badge {% if b.booking_status == 'Confirmed' %}bg-success{% elif b.booking_status == 'Checked-In' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ b.booking_status }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                {% if b.booking_status == 'Confirmed' %}
+                                    <button class="btn btn-outline-success btn-sm py-1 px-2 me-1" onclick="verifyBookingRef('{{ b.booking_ref }}')">
+                                        Check In
+                                    </button>
+                                {% endif %}
+                                <a href="/receipt/{{ b.booking_ref }}" target="_blank" class="btn btn-outline-secondary btn-sm py-1 px-2">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-3 text-muted">No records found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function handleAdminCheckin(e) {
+        e.preventDefault();
+        var ref = document.getElementById("checkinRefInput").value.trim();
+        if (ref) verifyBookingRef(ref);
+    }
+
+    function verifyBookingRef(ref) {
+        fetch('/api/checkin/' + ref, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            var box = document.getElementById("checkinResultBox");
+            var txt = document.getElementById("checkinResultText");
+            box.classList.remove("d-none");
+            if (data.success) {
+                txt.className = "text-success fw-bold";
+                txt.innerText = "Verified! " + data.booking.devotee_name + " marked Checked-In.";
+                setTimeout(() => window.location.reload(), 1200);
+            } else {
+                txt.className = "text-danger fw-bold";
+                txt.innerText = data.error || "Verification failed.";
+            }
+        });
+    }
+
+    function exportTableToCSV(filename) {
+        var csv = [];
+        var rows = document.querySelectorAll("#pilgrimsTable tr");
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll("td, th");
+            for (var j = 0; j < cols.length - 1; j++) {
+                row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
+            }
+            csv.push(row.join(","));
+        }
+        var blob = new Blob([csv.join("\n")], { type: "text/csv" });
+        var a = document.createElement("a");
+        a.download = filename;
+        a.href = URL.createObjectURL(blob);
+        a.click();
+    }
+</script>
+{% endblock %}
