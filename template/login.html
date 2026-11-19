@@ -13,15 +13,7 @@
                     <p class="text-muted small">Sign in to view your bookings and passes</p>
                 </div>
 
-                <!-- Devotee Login Demo Helper (No Admin info in user view) -->
-                <div class="p-2 mb-3 rounded bg-light border text-center small">
-                    <span class="text-muted me-2">Demo Devotee:</span>
-                    <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3" onclick="fillCredentials('santhoshpodili874@gmail.com', 'devotee123')">
-                        Auto Fill Devotee Login
-                    </button>
-                </div>
-
-                <form method="POST" action="/login">
+                <form method="POST" action="/login{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email Address</label>
                         <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
@@ -44,7 +36,7 @@
 
                 <div class="text-center mt-3 pt-2 border-top">
                     <small class="text-muted">
-                        Don't have an account? <a href="/signup" class="fw-bold">Sign Up</a>
+                        Don't have an account? <a href="/signup{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" class="fw-bold">Sign Up</a>
                     </small>
                 </div>
             </div>
@@ -65,11 +57,6 @@
             pwd.type = "password";
             icon.classList.replace("fa-eye-slash", "fa-eye");
         }
-    }
-
-    function fillCredentials(email, pwd) {
-        document.getElementById("email").value = email;
-        document.getElementById("password").value = pwd;
     }
 </script>
 {% endblock %}

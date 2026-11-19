@@ -58,19 +58,19 @@
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control form-control-sm" id="devoteeName" value="{{ session.get('user_name', '') }}" placeholder="Devotee Name" required>
+                            <input type="text" class="form-control form-control-sm" id="devoteeName" value="{{ current_user.name if current_user else session.get('user_name', '') }}" placeholder="Devotee Name" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Mobile Number</label>
-                            <input type="tel" class="form-control form-control-sm" id="devoteePhone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" required>
+                            <input type="tel" class="form-control form-control-sm" id="devoteePhone" pattern="[0-9]{10}" maxlength="10" value="{{ current_user.phone if current_user else '' }}" placeholder="10-digit number" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Aadhaar Number</label>
-                            <input type="text" class="form-control form-control-sm" id="devoteeAadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit number" required>
+                            <input type="text" class="form-control form-control-sm" id="devoteeAadhar" pattern="[0-9]{12}" maxlength="12" value="{{ current_user.aadhar if current_user else '' }}" placeholder="12-digit number" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control form-control-sm" id="devoteeEmail" value="{{ session.get('user_email', '') }}" placeholder="devotee@example.com" required>
+                            <input type="email" class="form-control form-control-sm" id="devoteeEmail" value="{{ current_user.email if current_user else session.get('user_email', '') }}" placeholder="devotee@example.com" required>
                         </div>
                     </div>
 

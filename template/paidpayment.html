@@ -183,10 +183,19 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bookingData)
         })
-        .then(res => res.json())
-        .then(data => {
-            sessionStorage.removeItem("pendingBooking");
-            window.location.href = "/confirmation?ref=" + (data.booking_ref || "");
+        .then(async res => {
+            const data = await res.json();
+            if (res.status === 401 || data.require_login) {
+                alert("Please sign in or register to complete your booking.");
+                window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+                return;
+            }
+            if (data.booking_ref) {
+                sessionStorage.removeItem("pendingBooking");
+                window.location.href = "/confirmation?ref=" + data.booking_ref;
+            } else if (data.error) {
+                alert(data.error);
+            }
         })
         .catch(err => {
             window.location.href = "/confirmation";

@@ -13,7 +13,7 @@
                     <p class="text-muted small">Create an account for darshan bookings</p>
                 </div>
 
-                <form method="POST" action="/signup" onsubmit="return validateSignupForm()">
+                <form method="POST" action="/signup{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" onsubmit="return validateSignupForm()">
                     <div class="row g-2 mb-3">
                         <div class="col-12">
                             <label for="name" class="form-label">Full Name</label>
@@ -52,7 +52,7 @@
 
                 <div class="text-center mt-3 pt-2 border-top">
                     <small class="text-muted">
-                        Already have an account? <a href="/login" class="fw-bold">Sign In</a>
+                        Already have an account? <a href="/login{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" class="fw-bold">Sign In</a>
                     </small>
                 </div>
             </div>

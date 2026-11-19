@@ -17,7 +17,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('user_id'):
-            flash("Please sign in to access your devotee bookings.", "warning")
+            flash("Please sign in or create an account to book temple darshans and sevas.", "warning")
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
@@ -80,6 +80,9 @@ def signup():
             session['user_email'] = email.lower()
             session['user_role'] = 'devotee'
             flash("Registration successful! Your pilgrim profile is active.", "success")
+            next_url = request.args.get('next')
+            if next_url:
+                return redirect(next_url)
             return redirect(url_for('my_bookings'))
         else:
             flash(f"Registration failed: {err}", "error")
@@ -126,6 +129,7 @@ def home():
     return render_template("index.html")
 
 @app.route('/confirmation')
+@login_required
 def confirmation():
     ref = request.args.get('ref')
     booking = None
@@ -158,57 +162,85 @@ def srilakshmitirupathiamma():
 
 @app.route('/paiddarshan')
 @app.route('/paid_darshan')
+@login_required
 def paid_darshan():
     return render_template("paiddarshan.html")
 
 @app.route('/vip_darshan')
+@login_required
 def vip_darshan():
     return render_template("vip_darshan.html")
 
 @app.route('/free_darshan')
+@login_required
 def free_darshan():
     return render_template("free_darshan.html")
 
 @app.route('/roombooking')
+@login_required
 def room_booking():
     return render_template("roombooking.html")
 
 @app.route('/prasadbooking')
+@login_required
 def prasad_booking():
     return render_template("prasadbooking.html")
 
 @app.route('/foodbooking')
+@login_required
 def food_booking():
     return render_template("foodbooking.html")
 
 @app.route('/taxibooking')
+@login_required
 def taxi_booking():
     return render_template("taxibooking.html")
 
 @app.route('/vehicle')
+@login_required
 def vehicle_parking():
     return render_template("vehicle.html")
 
 @app.route('/paid_payment')
+@login_required
 def paid_payment():
     return render_template('paidpayment.html')
 
 @app.route('/room_payment')
+@login_required
 def room_payment():
     return render_template('room_payment.html')
 
 @app.route('/vehicle_payment')
+@login_required
 def vehicle_payment():
     return render_template('vehicle_payment.html')
 
 @app.route('/save_booking', methods=['POST'])
 def save_booking():
+    if not session.get('user_id'):
+        return jsonify({
+            'error': 'Please sign in or register before completing your booking.',
+            'require_login': True,
+            'login_url': url_for('login')
+        }), 401
     try:
         data = request.get_json(force=True, silent=True)
         if not data:
             data = request.form.to_dict()
             
         user_id = session.get('user_id')
+        user = db.get_user_by_id(user_id)
+        if user:
+            if not data.get('name') and not data.get('devotee_name'):
+                data['name'] = user.get('name', '')
+            if not data.get('email'):
+                data['email'] = user.get('email', '')
+            if not data.get('phone'):
+                data['phone'] = user.get('phone', '')
+            if not data.get('aadhar') and not data.get('adhar'):
+                data['aadhar'] = user.get('aadhar', '')
+                
         booking = db.create_booking(data, user_id=user_id)
         
         return jsonify({

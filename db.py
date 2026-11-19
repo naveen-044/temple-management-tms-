@@ -63,66 +63,6 @@ def init_db():
                 "created_at": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
             })
             
-        # Seed default devotee user if not exists
-        if not db.users.find_one({"email": "santhoshpodili874@gmail.com"}):
-            devotee_hash = generate_password_hash("devotee123")
-            db.users.insert_one({
-                "name": "Santhosh Podili",
-                "email": "santhoshpodili874@gmail.com",
-                "phone": "8374710287",
-                "aadhar": "543210987654",
-                "city": "Vijayawada",
-                "password_hash": devotee_hash,
-                "role": "devotee",
-                "created_at": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-            })
-            
-        # Seed sample bookings if collection is empty
-        if db.bookings.count_documents({}) == 0:
-            sample_bookings = [
-                {
-                    "booking_ref": "TTD-78214",
-                    "devotee_name": "Santhosh Podili",
-                    "email": "santhoshpodili874@gmail.com",
-                    "phone": "8374710287",
-                    "aadhar": "543210987654",
-                    "age": 28,
-                    "temple_name": "Tirumala Tirupathi Devasthanam",
-                    "service_type": "Special Entry Darshan (₹350)",
-                    "service_date": "2026-11-20",
-                    "slot_time": "09:00 AM - 11:00 AM",
-                    "quantity": 2,
-                    "unit_price": 350.0,
-                    "total_amount": 700.0,
-                    "extra_details": {"gothram": "Kashyapa", "laddus": 4},
-                    "payment_status": "Completed",
-                    "payment_method": "UPI",
-                    "booking_status": "Confirmed",
-                    "created_at": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-                },
-                {
-                    "booking_ref": "KDK-44109",
-                    "devotee_name": "Santhosh Podili",
-                    "email": "santhoshpodili874@gmail.com",
-                    "phone": "8374710287",
-                    "aadhar": "543210987654",
-                    "age": 28,
-                    "temple_name": "Sri Durga Malleswara Kanaka Durgamma",
-                    "service_type": "Prasad Booking",
-                    "service_date": "2026-11-21",
-                    "slot_time": "Counter 1",
-                    "quantity": 4,
-                    "unit_price": 50.0,
-                    "total_amount": 200.0,
-                    "extra_details": {"laddu_type": "Special Ghee Laddu"},
-                    "payment_status": "Completed",
-                    "payment_method": "Card",
-                    "booking_status": "Confirmed",
-                    "created_at": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-                }
-            ]
-            db.bookings.insert_many(sample_bookings)
-            
         print("MongoDB initialized successfully with collections: users, bookings")
     except Exception as e:
         print("MongoDB init error:", e)
